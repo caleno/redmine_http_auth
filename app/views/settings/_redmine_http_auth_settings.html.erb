@@ -26,3 +26,14 @@
   <%=content_tag(:label, l(:label_keep_sessions))%>
   <%=check_box_tag 'settings[keep_sessions]', true, @settings['keep_sessions'] == "true" %>
 </p>
+
+
+<p>
+  <%=content_tag(:label, l(:label_login_link)) %>
+  <%=text_field_tag 'settings[login_link]', @settings['login_link'] %><br/>
+</p>
+
+<p>
+  <%=content_tag(:label, l(:label_login_return_parameter)) %>
+  <%=text_field_tag 'settings[login_return_parameter]', @settings['login_return_parameter'] %><br/>
+</p>

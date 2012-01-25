@@ -1,6 +1,7 @@
 require 'redmine'
 require 'dispatcher'
 require 'http_auth_patch'
+require 'http_auth_account_patch'
  
 Redmine::Plugin.register :redmine_http_auth do
   name 'HTTP Authentication plugin'
@@ -18,12 +19,17 @@ Redmine::Plugin.register :redmine_http_auth do
       'server_env_var' => 'REMOTE_USER',
       'lookup_mode' => 'login',
       'auto_registration' => 'false',
-      'keep_sessions' => 'false'
+      'keep_sessions' => 'false',
+      'login_link' => '',
+      'login_return_parameter' => '',
     }
 end
 
 Dispatcher.to_prepare do
   #include our code
   ApplicationController.send(:include, HTTPAuthPatch)
+
+  require_dependency 'account_controller'
+  AccountController.send(:include, HTTPAuthAccountPatch)
 end
 
