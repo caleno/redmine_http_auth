@@ -24,6 +24,10 @@ Redmine::Plugin.register :redmine_http_auth do
       'login_return_parameter' => '',
       'logout_link' => '',
       'logout_return_parameter' => '',
+      'jitprovision' => 'false',
+      'jitprovision_firstname' => '',
+      'jitprovision_lastname' => '',
+      'jitprovision_mail' => '',
     }
 end
 

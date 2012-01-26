@@ -16,3 +16,7 @@ label_login_link: Link to trigger login
 label_login_return_parameter: Parameter with return URL
 label_logout_link: Link to trigger logout
 label_logout_return_parameter: Parameter with return URL
+label_enable_jitprovision: Just-in-time provisioning of users
+label_jitprovision_firstname: Environment variable with first name
+label_jitprovision_lastname: Environment variable with last name
+label_jitprovision_mail: Environment variable with email address

@@ -53,6 +53,15 @@ module HTTPAuthPatch
       else
         user = User.active.find_by_login remote_username
       end
+
+      if jit_provision?
+        if user.nil?
+          user = jit_provision(remote_username)
+        else
+          jit_provision_update(user)
+        end
+      end
+
       if user.nil?
         #user was not found in the database, try selfregistration if enabled
         if Setting.plugin_redmine_http_auth['auto_registration'] == 'true'
@@ -94,6 +103,34 @@ module HTTPAuthPatch
         return nil
       end
     end
+
+
+    def jit_provision(remote_username)
+      user = User.new
+      user.login = remote_username
+
+      jit_provision_data().each do |name,value|
+        user.send(name + '=', value)
+      end
+
+      if not user.save()
+        return nil
+      end
+
+      return user
+    end
+
+    def jit_provision_update(user)
+
+      updated = false
+      jit_provision_data().each do |name,value|
+        old_value = user.send(name)
+        user.send(name + '=', value) if old_value != value
+      end
+
+      user.save() if updated
+    end
+
   end
 end
 

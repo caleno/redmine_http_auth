@@ -29,6 +29,8 @@ module HttpAuthHelper
     if remote_user_attribute? attribute_name
       true
     else
+      return true if jit_provision? and not Setting.plugin_redmine_http_auth['jitprovision_' + attribute_name].blank?
+
       conf = Setting.plugin_redmine_http_auth['readonly_attribute']
       if conf.nil? || !conf.has_key?(attribute_name)
         false
@@ -47,6 +49,9 @@ module HttpAuthHelper
     if remote_user_attribute? attribute_name
       remote_user
     else
+      jit_data = jit_provision_data()
+      return jit_data[attribute_name] if jit_data.has_key?(attribute_name)
+
       conf = Setting.plugin_redmine_http_auth['attribute_mapping']
       if conf.nil? || !conf.has_key?(attribute_name)
         nil
@@ -55,5 +60,23 @@ module HttpAuthHelper
       end
     end
   end
+
+  def jit_provision?
+    return Setting.plugin_redmine_http_auth['jitprovision'] == 'true'
+  end
+
+  def jit_provision_data
+    # Function to get autoprovisioned data.
+    return {} if not jit_provision? #JIT provisioning not enabled.
+    ret = {}
+    ['firstname', 'lastname', 'mail'].each do |name|
+      env_name = Setting.plugin_redmine_http_auth['jitprovision_' + name]
+      next if env_name.empty?
+      next if not request.env.has_key?(env_name)
+      ret[name] = request.env[env_name]
+    end
+    return ret
+  end
+
 
 end

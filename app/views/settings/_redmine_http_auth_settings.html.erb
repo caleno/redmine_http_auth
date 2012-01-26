@@ -47,3 +47,24 @@
   <%=content_tag(:label, l(:label_logout_return_parameter)) %>
   <%=text_field_tag 'settings[logout_return_parameter]', @settings['logout_return_parameter'] %><br/>
 </p>
+
+
+<p>
+  <%=content_tag(:label, l(:label_enable_jitprovision))%>
+  <%=check_box_tag 'settings[jitprovision]', true, @settings['jitprovision'] == "true" %>
+</p>
+
+<p>
+  <%=content_tag(:label, l(:label_jitprovision_firstname)) %>
+  <%=text_field_tag 'settings[jitprovision_firstname]', @settings['jitprovision_firstname'] %><br/>
+</p>
+
+<p>
+  <%=content_tag(:label, l(:label_jitprovision_lastname)) %>
+  <%=text_field_tag 'settings[jitprovision_lastname]', @settings['jitprovision_lastname'] %><br/>
+</p>
+
+<p>
+  <%=content_tag(:label, l(:label_jitprovision_mail)) %>
+  <%=text_field_tag 'settings[jitprovision_mail]', @settings['jitprovision_mail'] %><br/>
+</p>
