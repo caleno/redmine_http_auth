@@ -21,6 +21,11 @@ module HTTPAuthPatch
       #if the http_auth is disabled in config, return the user
       return user unless Setting.plugin_redmine_http_auth['enable'] == "true"
 
+      if user and !used_http_authentication?
+        # The user was not authenticated using http_auth - don't force the use of it.
+        return user
+      end
+
       remote_username = remote_user
       if remote_username.nil?
         #do not touch user, if he didn't use http authentication to log in
