@@ -22,6 +22,8 @@ Redmine::Plugin.register :redmine_http_auth do
       'keep_sessions' => 'false',
       'login_link' => '',
       'login_return_parameter' => '',
+      'logout_link' => '',
+      'logout_return_parameter' => '',
     }
 end
 

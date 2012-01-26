@@ -9,10 +9,15 @@ module HTTPAuthAccountPatch
         :login_without_httpauth if method_defined? 'login_without_httpauth'
       #chain our version of find_current_user implementation into redmine core
       alias_method_chain(:login, :httpauth)
+
+      # Logout
+      alias_method :logout, :logout_without_httpauth if method_defined? 'logout_without_httpauth'
+      alias_method_chain(:logout, :httpauth)
     end
   end
 
   module ClassMethods
+    include HttpAuthHelper
 
     def login_force_httpauth
       # This is similar to the login page, except that it only supports http auth
@@ -58,6 +63,35 @@ module HTTPAuthAccountPatch
       # Trigger httpauth authentication.
       return login_force_httpauth()
     end
+
+    def logout_with_httpauth
+
+      logout_user
+
+      return redirect_to(home_url) if remote_user().nil? # http_auth not in use.
+
+      url = Setting.plugin_redmine_http_auth['logout_link']
+      return redirect_to(home_url) if url.blank? # No URL configured - not much we can do.
+
+      # Trigger full logout.
+
+      return_param = Setting.plugin_redmine_http_auth['login_return_parameter']
+      if !return_param.blank?
+        # We can tell the logout handler where to go after logout.
+
+        if url.include?('?')
+          sep = '&'
+        else
+          sep = '?'
+        end
+
+        url += sep + CGI.escape(return_param) + '=' + CGI.escape(home_url)
+      end
+
+      logger.debug('httpauth logout redirecting to: ' + url)
+      redirect_to(url)
+    end
+
   end
 
 end

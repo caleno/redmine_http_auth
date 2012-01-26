@@ -14,3 +14,5 @@ error_unknown_user: User was not found in the database
 label_keep_sessions: Keep redmine sessions open after HTTP authentication lost (dangerous!)
 label_login_link: Link to trigger login
 label_login_return_parameter: Parameter with return URL
+label_logout_link: Link to trigger logout
+label_logout_return_parameter: Parameter with return URL
