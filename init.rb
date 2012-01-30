@@ -11,11 +11,12 @@ Redmine::Plugin.register :redmine_http_auth do
   version '0.3.0-dev'
   menu :account_menu, :login_httpauth, { :controller => 'httpauth-login' }, 
     :before => :login, :caption => :login_httpauth_title,
-    :if => Proc.new { User.current.anonymous? && Setting.plugin_redmine_http_auth['enable'] == 'true' }
+    :if => Proc.new { User.current.anonymous? && Setting.plugin_redmine_http_auth['enable'] == 'true' && Setting.plugin_redmine_http_auth['enable_login_link'] == 'true'}
 
   settings :partial => 'settings/redmine_http_auth_settings',
     :default => {
       'enable' => 'true',
+      'enable_login_link' => 'true',
       'server_env_var' => 'REMOTE_USER',
       'lookup_mode' => 'login',
       'auto_registration' => 'false',

@@ -20,3 +20,4 @@ label_enable_jitprovision: Just-in-time provisioning of users
 label_jitprovision_firstname: Environment variable with first name
 label_jitprovision_lastname: Environment variable with last name
 label_jitprovision_mail: Environment variable with email address
+label_enable_login_link: Enable HTTP-Auth sign in link
