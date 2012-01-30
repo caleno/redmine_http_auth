@@ -75,7 +75,7 @@ module HTTPAuthAccountPatch
 
       # Trigger full logout.
 
-      return_param = Setting.plugin_redmine_http_auth['login_return_parameter']
+      return_param = Setting.plugin_redmine_http_auth['logout_return_parameter']
       if !return_param.blank?
         # We can tell the logout handler where to go after logout.
 
