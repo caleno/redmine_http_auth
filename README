@@ -1,100 +1,68 @@
-HTTP Authentication plugin for Redmine
+HTTP Authentication plugin for Redmine with SAML 2.0 support
 =======
 
-This plugin enables an optional HTTP authentication method in the Redmine
-project management tool.
+This is a slightly modified version of the HTTP Authentication plugin for
+Redmine. The original version can be found at:
 
-If the REMOTE_USER server environment variable is set, an attempt is
-made to look up the matching local user account and log in. An attempt is made
-to synchronize redmine session with the container managed authentication session,
-but this can be switched off.
+    https://github.com/AdamLantos/redmine_http_auth
 
-This module does not disable the form-based login unless HTTP authentication
-credentials are available, in which case the username from the environment
-will override the form-based login.
+The goal of the modifications is to support SAML 2.0 authentication and
+just-in-time provisioning of users.
+
+We use the mod_mellon module for Apache for authentication:
+
+    http://code.google.com/p/modmellon/
 
 
-Installation
+Quick installation guide
 =======
 
-Use the following command in your Redmine instance directory:
+1. Install mod_mellon. (Can in theory use any other authentication plugin
+   for Apache that sets REMOTE_USER and provides user attributes.)
 
-# ruby script/plugin install http://github.com/AdamLantos/redmine_http_auth.git
+2. Configure mod_mellon. We used something like:
 
+        <Location />
+          MellonEnable info
+          MellonSecureCookie On
+          MellonEndpointPath /mellon
 
-Settings
-=======
+          MellonUser eduPersonPrincipalName
 
-The behavior of this plugin can be customized through the 'settings' page in the
-plugins menu. Currently there are three options:
+          MellonSPMetadataFile /etc/apache2/mellon/sp.example.org.xml
+          MellonSPPrivateKeyFile /etc/apache2/mellon/sp.example.org.key
 
-- enable / disable HTTP Authentication (default: enable)
-- set the header / environment value to look for (default: REMOTE_USER)
-- change local user lookup mode from login name to email address
-  (default: login name)
-- enable / disable automatic registration (default: disable), see below
-- enable / disable the "keep session" behavior (default: disable), see below
+          MellonIdPMetadataFile /etc/apache2/mellon/openidp.feide.no.xml
+        </Location>
 
+   See the mod_mellon documentation for details. (Remember to restart Apache
+   after the configuration changes.)
 
-Known issues
-=======
+3. Test mod_mellon. Visit:
 
-If you encounter "uninitialized constant Rails::Plugin::ApplicationController"
-exception with any Redmine version prior to Redmine-0.9, just rename your
-app/controllers/application.rb to app/controllers/application_controller.rb.
+        https://your-site.example.org/mellon/login?ReturnTo=/invalidURL
 
+   You should be sent to your IdP for authentication. Afterwards you should
+   end up at /invalidURL
 
-Automatic registration of user accounts
-=======
+4. Install this redmine plugin:
 
-If a user doesn't exist in the redmine local database, the http_authentication
-plugin can automatically create an account for them. This automatic registration
-currently presents a form to the user where additional attributes (like email
-address, first name or last name) should be entered.
+        ruby script/plugin install git://github.com/UNINETT/redmine_http_auth.git
 
-The plugin currently doesn't handle automatic attribute transformation from the
-authentication environment (eg. Shibboleth session), but it does enforce the
-lookup attribute matching with the environment.
+   (You may have to restart Apache afterwards.)
 
-Automatically registered accounts don't have associated passwords, but the
-user can change their password via the common password change form.
+5. Configure the plugin:
 
-
-Session synchronization
-=======
-
-When using container managed authentication (like SSO systems), one needs to
-ensure, that the currently logged-on user is the same which initiated the session.
-Additionally, there is a need to offer logout functionality to the end user.
-
-By default, the http_authentication plugin synchronizes the container managed
-authentication session to the redmine session. This means that if the underlying
-session changes or ends, the redmine session changes and ends as well.
+       * Link to trigger login: /mellon/login
+       * Parameter with return URL: ReturnTo
+       * Link to trigger logout: /mellon/logout
+       * Parameter with return URL: ReturnTo
 
 
-Using lazy authentication
-=======
+   For just-in-time provisioning, you will need to receive attributes with user
+   information from the IdP. mod_mellon will then add them as environment
+   variables that this plugin can use for provisioning. We use:
 
-The http_authentication plugin provides a top menu link for lazy, user-requested
-authentication purposes. This link points to the `/httpauth-login` URL. If you
-want to enable both http_authentication and normal form-based logins, you need
-to use this link to enforce container authentication.
-
-However, many authentication mechanisms (namely apache httpd mod_auth_basic)
-don't offer a way to do lazy authentication. If an URL is not "enforced", the
-authorization information (eg. REMOTE_USER) is not populated. Thus, the session
-synchronization code will invalidate user sessions outside the protected realm.
-
-You can alter this behavior by switching on the "keep sessions" setting. But
-please consider that this might be dangerous. Do not use this feature if you
-are implementing SSO systems, you've been warned.
-
-
-Planned features
-=======
-
-- option to disable form-based login for users when the plugin is activated
-- integration with the custom features of various SSO systems (eg. Shibboleth)
-
-
-Copyright (c) 2010 NIIF Institute and Adam Lantos, released under the MIT license
+       * Environment variable with first name: "MELLON_givenName"
+       * Environment variable with last name: "MELLON_sn"
+       * Environment variable with email address: "MELLON_mail"
